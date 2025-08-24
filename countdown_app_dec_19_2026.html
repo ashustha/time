@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Countdown to Dec 19, 2026</title>
+    <style>
+      :root {
+        --bg: #0b0b10;
+        --fg: #e8e8ef;
+        --muted: #a9a9b3;
+        --card: #14141d;
+        --accent: #7aa2f7;
+        --highlight: #ff4b4b;
+      }
+      html,
+      body {
+        height: 100%;
+      }
+      body {
+        margin: 0;
+        font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica,
+          Arial, 'Apple Color Emoji', 'Segoe UI Emoji';
+        background: radial-gradient(
+          1200px 800px at 70% -10%,
+          #192034 0%,
+          var(--bg) 60%
+        );
+        color: var(--fg);
+        display: grid;
+        place-items: center;
+      }
+      .wrap {
+        width: min(900px, 92vw);
+        padding: 24px;
+      }
+      h1 {
+        font-size: clamp(24px, 5vw, 40px);
+        margin: 0 0 8px;
+        letter-spacing: 0.3px;
+      }
+      p {
+        margin: 0 0 24px;
+        color: var(--muted);
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 16px;
+      }
+      .card {
+        background: linear-gradient(
+          180deg,
+          rgba(255, 255, 255, 0.04),
+          rgba(255, 255, 255, 0.02)
+        );
+        border: 1px solid rgba(255, 255, 255, 0.06);
+        border-radius: 18px;
+        padding: 22px;
+        box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
+      }
+      .label {
+        font-size: 14px;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--muted);
+        margin-bottom: 8px;
+      }
+      .value {
+        font-variant-numeric: tabular-nums;
+        font-size: clamp(40px, 8vw, 64px);
+        font-weight: 700;
+        line-height: 1.1;
+      }
+      .footer {
+        margin-top: 20px;
+        font-size: 13px;
+        color: var(--muted);
+      }
+      .accent {
+        color: var(--accent);
+      }
+      .highlight {
+        color: var(--highlight);
+      }
+      .checklist {
+        margin-top: 30px;
+      }
+      .checklist h2 {
+        font-size: 20px;
+        margin-bottom: 12px;
+      }
+      .task-list {
+        list-style: none;
+        padding: 0;
+      }
+      .task-list li {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        background: var(--card);
+        padding: 10px 14px;
+        border-radius: 12px;
+        margin-bottom: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+      }
+      .hidden {
+        display: none;
+      }
+      .toggle-btn {
+        margin-top: 16px;
+        padding: 8px 16px;
+        border: none;
+        border-radius: 8px;
+        background: var(--accent);
+        color: white;
+        font-size: 14px;
+        cursor: pointer;
+      }
+      @media (prefers-color-scheme: light) {
+        :root {
+          --bg: #f8f8fb;
+          --fg: #0e1116;
+          --muted: #5b616e;
+          --card: #ffffff;
+          --accent: #2b6de0;
+          --highlight: #d40000;
+        }
+        body {
+          background: radial-gradient(
+            1200px 800px at 70% -10%,
+            #dde7ff 0%,
+            var(--bg) 60%
+          );
+        }
+        .card {
+          border-color: rgba(0, 0, 0, 0.06);
+          box-shadow: 0 8px 18px rgba(0, 0, 0, 0.08);
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="wrap">
+      <h1>Time until <span class="highlight">December 19, 2026</span></h1>
+      <p>
+        This shows the remaining <strong>calendar months</strong> and leftover
+        days.
+      </p>
+
+      <section class="grid" aria-live="polite">
+        <div class="card">
+          <div class="label">Months</div>
+          <div class="value" id="months">–</div>
+        </div>
+        <div class="card">
+          <div class="label">Days</div>
+          <div class="value" id="days">–</div>
+        </div>
+      </section>
+      <section>
+        <h2>Things to complete in next 4 months</h2>
+        <ul>
+          <li>Get Driving Lisence</li>
+          <li>Get 80 in PTE</li>
+          <li>NAATI</li>
+        </ul>
+      </section>
+
+      <div class="footer" id="meta"></div>
+    </main>
+
+    <script>
+      (function () {
+        const target = new Date(2026, 11, 19, 0, 0, 0); // Dec is month 11 (0-indexed)
+
+        function diffBreakdown(from, to) {
+          if (from >= to) return { months: 0, days: 0 };
+
+          let months =
+            (to.getFullYear() - from.getFullYear()) * 12 +
+            (to.getMonth() - from.getMonth());
+          let anchor = new Date(from);
+          anchor.setHours(0, 0, 0, 0);
+          const temp = new Date(anchor);
+          temp.setMonth(temp.getMonth() + months);
+          if (temp > to) {
+            months -= 1;
+          }
+          anchor.setMonth(anchor.getMonth() + months);
+
+          let remainingMs = to - (from > anchor ? from : anchor);
+
+          const MS_DAY = 24 * 3600000;
+          let days = Math.floor(remainingMs / MS_DAY);
+
+          return { months, days };
+        }
+
+        function tick() {
+          const now = new Date();
+          const { months, days } = diffBreakdown(now, target);
+          document.getElementById('months').textContent = months;
+          document.getElementById('days').textContent = days;
+
+          const meta = document.getElementById('meta');
+          meta.textContent =
+            now >= target
+              ? 'The target date has passed.'
+              : `Updated: ${now.toLocaleString()} • Target: ${target.toLocaleDateString()} 00:00`;
+        }
+
+        tick();
+        setInterval(tick, 1000);
+      })();
+    </script>
+  </body>
+</html>
